@@ -11,19 +11,11 @@ import (
 var invalidObjError = errors.New("invalid object")
 var pathDelimiter string = "."
 
-type pathToken struct {
-	op    string
-	value string
-}
-
-func tokenizePath(path string) ([]pathToken, error) {
-	var tokens []pathToken
+func tokenizePath(path string) ([]string, error) {
+	var tokens []string
 	for _, stem := range strings.Split(path, pathDelimiter) {
 		if !strings.Contains(stem, "[") {
-			tokens = append(tokens, pathToken{
-				op:    "key",
-				value: stem,
-			})
+			tokens = append(tokens, stem)
 			continue
 		}
 		firstBracketIndex := strings.Index(stem, "[")
@@ -31,20 +23,14 @@ func tokenizePath(path string) ([]pathToken, error) {
 		if lastBracketIndex < 0 {
 			return nil, fmt.Errorf("invalid path: %v", path)
 		}
-		tokens = append(tokens, pathToken{
-			op:    "key",
-			value: stem[0:firstBracketIndex],
-		})
+		tokens = append(tokens, stem[0:firstBracketIndex])
 		innerText := stem[firstBracketIndex+1 : lastBracketIndex]
-		tokens = append(tokens, pathToken{
-			op:    "index",
-			value: innerText,
-		})
+		tokens = append(tokens, innerText)
 	}
 	return tokens, nil
 }
 
-func getKey(obj interface{}, token *pathToken) (interface{}, error) {
+func getKey(obj interface{}, key string) (interface{}, error) {
 	if reflect.TypeOf(obj) == nil {
 		return nil, invalidObjError
 	}
@@ -52,13 +38,13 @@ func getKey(obj interface{}, token *pathToken) (interface{}, error) {
 	switch reflect.TypeOf(obj).Kind() {
 	case reflect.Map:
 		for _, kv := range reflect.ValueOf(obj).MapKeys() {
-			if kv.String() == token.value {
+			if kv.String() == key {
 				return reflect.ValueOf(obj).MapIndex(kv).Interface(), nil
 			}
 		}
-		return nil, fmt.Errorf("%v not found in object", token.value)
+		return nil, fmt.Errorf("%v not found in object", key)
 	case reflect.Slice:
-		idx, err := strconv.Atoi(token.value)
+		idx, err := strconv.Atoi(key)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +68,7 @@ func Get(data interface{}, path string) (interface{}, error) {
 
 	child := data
 	for _, token := range tokens {
-		child, err = getKey(child, &token)
+		child, err = getKey(child, token)
 		if err != nil {
 			return nil, err
 		}
