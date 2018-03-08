@@ -2,6 +2,7 @@ package jsonpath
 
 import (
 	"testing"
+	"reflect"
 )
 
 var data = map[string]interface{}{
@@ -20,10 +21,7 @@ var data = map[string]interface{}{
 }
 
 func TestGet(t *testing.T) {
-	var result interface{}
-	var err error
-
-	result, err = Get(data, "user.firstname")
+	result, err := Get(data, "user.firstname")
 	if err != nil {
 		t.Errorf("failed to get user.firstname")
 	}
@@ -41,5 +39,39 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
+	err := Set(&data, "user.firstname", "chris")
+	if err != nil {
+		t.Errorf("failed to set user.firstname: %v", err)
+	}
 
+	firstname := reflect.ValueOf(data["user"]).MapIndex(reflect.ValueOf("firstname")).Interface()
+	if firstname != "chris" {
+		t.Errorf("set user.firstname to wrong value, wanted: %v, got: %v", "chris", firstname)
+	}
+
+	err = Set(&data, "filmography.movies[2]", "The Disaster Artist")
+	if err != nil {
+		t.Errorf("failed to set filmography.movies[2]: %v", err)
+	}
+
+	secondMovie := reflect.ValueOf(data["filmography"]).MapIndex(reflect.ValueOf("movies")).Elem().Index(2).Interface()
+	if secondMovie != "The Disaster Artist" {
+		t.Errorf("set filmography.movies[2] to wrong value, wanted: %v, got %v", "The Disaster Artist", secondMovie)
+	}
+
+	newUser := map[string]interface{}{
+		"firstname": "james",
+		"lastname": "franco",
+	}
+
+	err = Set(&data, "user", &newUser)
+	if err != nil {
+		t.Errorf("failed to set user: %v", err)
+	}
+
+	user := data["user"]
+
+	if !reflect.DeepEqual(newUser, user) {
+		t.Errorf("set user is not equal, wanted: %v, got %v", newUser, user)
+	}
 }

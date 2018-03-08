@@ -9,7 +9,7 @@ import (
 )
 
 var invalidObjError = errors.New("invalid object")
-var pathDelimiter string = "."
+var pathDelimiter = "."
 
 func tokenizePath(path string) ([]string, error) {
 	var tokens []string
@@ -30,7 +30,7 @@ func tokenizePath(path string) ([]string, error) {
 	return tokens, nil
 }
 
-func getKey(obj interface{}, key string) (interface{}, error) {
+func getToken(obj interface{}, token string) (interface{}, error) {
 	if reflect.TypeOf(obj) == nil {
 		return nil, invalidObjError
 	}
@@ -38,13 +38,13 @@ func getKey(obj interface{}, key string) (interface{}, error) {
 	switch reflect.TypeOf(obj).Kind() {
 	case reflect.Map:
 		for _, kv := range reflect.ValueOf(obj).MapKeys() {
-			if kv.String() == key {
+			if kv.String() == token {
 				return reflect.ValueOf(obj).MapIndex(kv).Interface(), nil
 			}
 		}
-		return nil, fmt.Errorf("%v not found in object", key)
+		return nil, fmt.Errorf("%v not found in object", token)
 	case reflect.Slice:
-		idx, err := strconv.Atoi(key)
+		idx, err := strconv.Atoi(token)
 		if err != nil {
 			return nil, err
 		}
@@ -57,18 +57,16 @@ func getKey(obj interface{}, key string) (interface{}, error) {
 		}
 		return nil, fmt.Errorf("%v not found in object", idx)
 	default:
-		fmt.Println(reflect.TypeOf(obj).Kind())
-		return nil, fmt.Errorf("object is not a map or a slice")
+		return nil, fmt.Errorf("object is not a map or a slice: %v", reflect.TypeOf(obj).Kind())
 	}
 }
 
-func Get(data interface{}, path string) (interface{}, error) {
+func getByTokens(data interface{}, tokens []string) (interface{}, error) {
 	var err error
-	tokens, err := tokenizePath(path)
 
 	child := data
 	for _, token := range tokens {
-		child, err = getKey(child, token)
+		child, err = getToken(child, token)
 		if err != nil {
 			return nil, err
 		}
@@ -81,6 +79,51 @@ func Get(data interface{}, path string) (interface{}, error) {
 	return nil, errors.New("could not get value at path")
 }
 
+func Get(data interface{}, path string) (interface{}, error) {
+	var err error
+	tokens, err := tokenizePath(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return getByTokens(data, tokens)
+}
+
 func Set(data interface{}, path string, value interface{}) error {
+	tokens, err := tokenizePath(path)
+	if err != nil {
+		return nil
+	}
+	head := tokens[:len(tokens)-1]
+	last := tokens[len(tokens)-1]
+
+	rv := reflect.ValueOf(data)
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	data = rv.Interface()
+
+	rv = reflect.ValueOf(value)
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	value = rv.Interface()
+
+	child, err := getByTokens(data, head)
+
+	switch reflect.TypeOf(child).Kind() {
+	case reflect.Map:
+		reflect.ValueOf(child).SetMapIndex(reflect.ValueOf(last),reflect.ValueOf(value))
+		return nil
+	case reflect.Slice:
+		sliceValue := reflect.ValueOf(child)
+		idx, err := strconv.Atoi(last)
+		if err != nil {
+			return err
+		}
+		sliceValue.Index(idx).Set(reflect.ValueOf(value))
+		return nil
+	}
+
 	return errors.New("could not set value at path")
 }
