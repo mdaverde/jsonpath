@@ -86,6 +86,12 @@ func Get(data interface{}, path string) (interface{}, error) {
 		return nil, err
 	}
 
+	rv := reflect.ValueOf(data)
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	data = rv.Interface()
+
 	return getByTokens(data, tokens)
 }
 
