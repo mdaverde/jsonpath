@@ -45,6 +45,11 @@ func TestGet(t *testing.T) {
 	if result != 35 {
 		t.Errorf("wrong get value, wanted: %v, got: %v", 35, result)
 	}
+
+	result, err = Get(data, "this.does.not[0].exist")
+	if result != nil || err != DoesNotExistErr {
+		t.Errorf("does not handle non-existant path correctly")
+	}
 }
 
 func TestSet(t *testing.T) {

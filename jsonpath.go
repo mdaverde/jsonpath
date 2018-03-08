@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var DoesNotExistErr = errors.New("path not found")
+
 var invalidObjError = errors.New("invalid object")
 var pathDelimiter = "."
 
@@ -42,7 +44,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 				return reflect.ValueOf(obj).MapIndex(kv).Interface(), nil
 			}
 		}
-		return nil, fmt.Errorf("%v not found in object", token)
+		return nil, DoesNotExistErr
 	case reflect.Slice:
 		idx, err := strconv.Atoi(token)
 		if err != nil {
@@ -55,7 +57,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 			}
 			return reflect.ValueOf(obj).Index(idx).Interface(), nil
 		}
-		return nil, fmt.Errorf("%v not found in object", idx)
+		return nil, DoesNotExistErr
 	default:
 		return nil, fmt.Errorf("object is not a map or a slice: %v", reflect.TypeOf(obj).Kind())
 	}
@@ -79,6 +81,14 @@ func getByTokens(data interface{}, tokens []string) (interface{}, error) {
 	return nil, errors.New("could not get value at path")
 }
 
+func followPtr(data interface{}) interface{} {
+	rv := reflect.ValueOf(data)
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	return rv.Interface()
+}
+
 func Get(data interface{}, path string) (interface{}, error) {
 	var err error
 	tokens, err := tokenizePath(path)
@@ -86,11 +96,7 @@ func Get(data interface{}, path string) (interface{}, error) {
 		return nil, err
 	}
 
-	rv := reflect.ValueOf(data)
-	for rv.Kind() == reflect.Ptr {
-		rv = rv.Elem()
-	}
-	data = rv.Interface()
+	data = followPtr(data)
 
 	return getByTokens(data, tokens)
 }
@@ -103,17 +109,8 @@ func Set(data interface{}, path string, value interface{}) error {
 	head := tokens[:len(tokens)-1]
 	last := tokens[len(tokens)-1]
 
-	rv := reflect.ValueOf(data)
-	for rv.Kind() == reflect.Ptr {
-		rv = rv.Elem()
-	}
-	data = rv.Interface()
-
-	rv = reflect.ValueOf(value)
-	for rv.Kind() == reflect.Ptr {
-		rv = rv.Elem()
-	}
-	value = rv.Interface()
+	data = followPtr(data)
+	value = followPtr(value)
 
 	child, err := getByTokens(data, head)
 
