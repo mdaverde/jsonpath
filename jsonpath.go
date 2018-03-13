@@ -37,7 +37,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 		return nil, invalidObjError
 	}
 
-	switch reflect.TypeOf(obj).Kind() {
+	switch reflect.ValueOf(obj).Kind() {
 	case reflect.Map:
 		for _, kv := range reflect.ValueOf(obj).MapKeys() {
 			if kv.String() == token {
@@ -59,7 +59,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 		}
 		return nil, DoesNotExistErr
 	default:
-		return nil, fmt.Errorf("object is not a map or a slice: %v", reflect.TypeOf(obj).Kind())
+		return nil, fmt.Errorf("object is not a map or a slice: %v", reflect.ValueOf(obj).Kind())
 	}
 }
 
@@ -136,7 +136,7 @@ func Set(data interface{}, path string, value interface{}) error {
 				}
 			}
 
-			switch reflect.TypeOf(parent).Kind(){
+			switch reflect.ValueOf(parent).Kind(){
 			case reflect.Map:
 				reflect.ValueOf(parent).SetMapIndex(reflect.ValueOf(token), reflect.ValueOf(child))
 			case reflect.Slice:
@@ -154,7 +154,7 @@ func Set(data interface{}, path string, value interface{}) error {
 		parent = child
 	}
 
-	switch reflect.TypeOf(child).Kind() {
+	switch reflect.ValueOf(child).Kind() {
 	case reflect.Map:
 		reflect.ValueOf(child).SetMapIndex(reflect.ValueOf(last),reflect.ValueOf(value))
 		return nil
