@@ -53,7 +53,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 		length := reflect.ValueOf(obj).Len()
 		if idx > -1 {
 			if idx >= length {
-				return nil, fmt.Errorf("index out of range: %v len: %v", idx, length)
+				return nil, DoesNotExistErr
 			}
 			return reflect.ValueOf(obj).Index(idx).Interface(), nil
 		}
@@ -106,13 +106,53 @@ func Set(data interface{}, path string, value interface{}) error {
 	if err != nil {
 		return nil
 	}
+
 	head := tokens[:len(tokens)-1]
 	last := tokens[len(tokens)-1]
 
 	data = followPtr(data)
 	value = followPtr(value)
 
-	child, err := getByTokens(data, head)
+	child := data
+	parent := data
+
+	for tokenIdx, token := range head {
+		child, err = getToken(parent, token)
+		if err != nil {
+			if err != DoesNotExistErr && err != invalidObjError {
+				return err
+			}
+
+			child = map[string]interface{}{}
+
+			if tokenIdx+1 < len(tokens) {
+				nextToken := tokens[tokenIdx+1]
+				if idx, err := strconv.Atoi(nextToken); err == nil {
+					var childSlice []interface{}
+					for i := 0; i < idx; i++ {
+						childSlice = append(childSlice, nil)
+					}
+					child = append(childSlice, map[string]interface{}{})
+				}
+			}
+
+			switch reflect.TypeOf(parent).Kind(){
+			case reflect.Map:
+				reflect.ValueOf(parent).SetMapIndex(reflect.ValueOf(token), reflect.ValueOf(child))
+			case reflect.Slice:
+				sliceValue := reflect.ValueOf(parent)
+				idx, err := strconv.Atoi(token)
+				if err != nil {
+					return err
+				}
+				sliceValue.Index(idx).Set(reflect.ValueOf(child))
+			default:
+				return errors.New("path contains items that are not maps nor structs")
+			}
+		}
+
+		parent = child
+	}
 
 	switch reflect.TypeOf(child).Kind() {
 	case reflect.Map:
@@ -124,6 +164,7 @@ func Set(data interface{}, path string, value interface{}) error {
 		if err != nil {
 			return err
 		}
+
 		sliceValue.Index(idx).Set(reflect.ValueOf(value))
 		return nil
 	}

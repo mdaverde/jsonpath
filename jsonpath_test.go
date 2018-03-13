@@ -84,9 +84,22 @@ func TestSet(t *testing.T) {
 	}
 
 	user := data["user"]
-
 	if !reflect.DeepEqual(newUser, user) {
 		t.Errorf("set user is not equal, wanted: %v, got %v", newUser, user)
+	}
+
+	newData := map[string]interface{}{
+		"hello": 12,
+	}
+
+	err = Set(&data, "this.does.not[0].exist", newData)
+	if err != nil {
+		t.Errorf("failed to set: %v", err)
+	} else {
+		exist := reflect.ValueOf(data["this"]).MapIndex(reflect.ValueOf("does")).Elem().MapIndex(reflect.ValueOf("not")).Elem().Index(0).Elem().MapIndex(reflect.ValueOf("exist")).Interface()
+		if !reflect.DeepEqual(exist, newData) {
+			t.Errorf("setting a nonexistant field did not work well, wanted: %#v, got %#v", newData, exist)
+		}
 	}
 }
 
@@ -134,7 +147,7 @@ func TestJSON(t *testing.T) {
 
 	result, err = Get(payload, "tags[2].hello[0]")
 	if result != "bobby" {
-		t.Errorf("got wrong value after setting, wanted: %v, got %v", "bobby", result)
+		t.Errorf("got wrong value after setting, wanted: %v, got: %v", "bobby", result)
 	}
 
 	newContact := map[string]string{
@@ -149,5 +162,26 @@ func TestJSON(t *testing.T) {
 	contact, err := Get(&payload, "pet.owner.contact")
 	if !reflect.DeepEqual(newContact, contact) {
 		t.Errorf("contact set do not equal, wanted: %v, got %v", newContact, contact)
+	}
+
+	small := `{}`
+
+	err = json.Unmarshal([]byte(small), &payload)
+	if err != nil {
+		t.Errorf("failed to parse: %v", err)
+	}
+
+	err = Set(&payload, "this.is.new[3]", map[string]interface{}{
+		"hello": "world",
+	})
+	if err != nil {
+		t.Errorf("setting a nonexistant field did not work well, %v", err)
+	}
+
+	b, err := json.Marshal(payload)
+	output := string(b)
+	expected := `{"this":{"is":{"new":[null,null,null,{"hello":"world"}]}}}`
+	if output != expected {
+		t.Errorf("did not set correctly, wanted: %v, got: %v", expected, output)
 	}
 }
