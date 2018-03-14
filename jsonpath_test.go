@@ -47,7 +47,7 @@ func TestGet(t *testing.T) {
 	}
 
 	result, err = Get(data, "this.does.not[0].exist")
-	if result != nil || err != DoesNotExistErr {
+	if _, ok:= err.(DoesNotExist); result != nil || !ok {
 		t.Errorf("does not handle non-existant path correctly")
 	}
 }
@@ -183,5 +183,12 @@ func TestJSON(t *testing.T) {
 	expected := `{"this":{"is":{"new":[null,null,null,{"hello":"world"}]}}}`
 	if output != expected {
 		t.Errorf("did not set correctly, wanted: %v, got: %v", expected, output)
+	}
+}
+
+func TestErrors(t *testing.T) {
+	_, err := Get(data, "where.is.this")
+	if _, ok := err.(DoesNotExist); !ok && err != nil {
+		t.Errorf("error retrieving value %v", err)
 	}
 }

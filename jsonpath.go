@@ -8,7 +8,12 @@ import (
 	"strings"
 )
 
-var DoesNotExistErr = errors.New("path not found")
+
+type DoesNotExist struct{}
+
+func (d DoesNotExist) Error() string {
+	return "path not found"
+}
 
 var invalidObjError = errors.New("invalid object")
 var pathDelimiter = "."
@@ -44,7 +49,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 				return reflect.ValueOf(obj).MapIndex(kv).Interface(), nil
 			}
 		}
-		return nil, DoesNotExistErr
+		return nil, DoesNotExist{}
 	case reflect.Slice:
 		idx, err := strconv.Atoi(token)
 		if err != nil {
@@ -53,11 +58,11 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 		length := reflect.ValueOf(obj).Len()
 		if idx > -1 {
 			if idx >= length {
-				return nil, DoesNotExistErr
+				return nil, DoesNotExist{}
 			}
 			return reflect.ValueOf(obj).Index(idx).Interface(), nil
 		}
-		return nil, DoesNotExistErr
+		return nil, DoesNotExist{}
 	default:
 		return nil, fmt.Errorf("object is not a map or a slice: %v", reflect.ValueOf(obj).Kind())
 	}
@@ -119,7 +124,7 @@ func Set(data interface{}, path string, value interface{}) error {
 	for tokenIdx, token := range head {
 		child, err = getToken(parent, token)
 		if err != nil {
-			if err != DoesNotExistErr && err != invalidObjError {
+			if _, ok := err.(DoesNotExist); !ok && err != invalidObjError {
 				return err
 			}
 
