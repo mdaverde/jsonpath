@@ -1,8 +1,15 @@
 # jsonpath
 
-Used to get and set data using JSONpath
+A golang library used to get and set simple jsonpaths. Originally intended to be used with `json.Unmarshal`.
 
-## Example
+
+## Install
+
+```bash
+$ go get github.com/mdaverde/jsonpath
+```
+
+## Usage
 
 ```go
 sample := `{ owner: { name: "john doe", contact: { phone: "555-555-5555" } } }`
@@ -10,18 +17,46 @@ sample := `{ owner: { name: "john doe", contact: { phone: "555-555-5555" } } }`
 var payload interface{}
 
 err := json.Unmarshal([]byte(sample), &payload)
-if err != nil {
-    panic(err)
-}
+must(err)
 
 err = jsonpath.Set(&payload, "owner.contact.phone", "333-333-3333")
-if err != nil {
-    panic(err)
+must(err)
+
+value, err := jsonpath.Get(payload, "owner.contact.phone")
+must(err)
+
+// value == "333-333-3333"
+```
+
+## API
+
+### jsonpath.Get(data interface{}, path string) (interface{}, error)
+
+Returns the value at that json path as `interface{}` and if an error occurred
+
+### jsonpath.Set(data interface{}, path string, value interface{}) (error)
+
+Sets `value` on `data` at that json path
+
+Note: you'll want to pass in a pointer to `data` so that the side effect actually is usable 
+
+### jsonpath.DoesNotExist error
+
+This is type of error returned with using `jsonpath.Get` on a nonexistent path:
+
+```go
+value, err := Get(data, "where.is.this")
+if _, ok := err.(DoesNotExist); !ok && err != nil {
+    // other error
 }
 ```
 
-## Install
+## Testing
 
 ```bash
-$ go get github.com/mdaverde/jsonpath
+$ go test .
 ```
+
+## License
+
+MIT © [mdaverde](https://mdaverde.com)
