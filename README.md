@@ -1,7 +1,6 @@
 # jsonpath
 
-A golang library used to get and set simple jsonpaths. Originally intended to be used with `json.Unmarshal`.
-
+Originally intended to be used with `json.Unmarshal`, this is a golang library used to able get and set jsonpaths (even nonexistent paths). 
 
 ## Install
 
@@ -12,7 +11,7 @@ $ go get github.com/mdaverde/jsonpath
 ## Usage
 
 ```go
-sample := `{ owner: { name: "john doe", contact: { phone: "555-555-5555" } } }`
+sample := `{ "owner": { "name": "john doe", "contact": { "phone": "555-555-5555" } } }`
 
 var payload interface{}
 
