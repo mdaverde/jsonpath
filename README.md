@@ -1,6 +1,6 @@
-# jsonpath
+# jsonpath [![Build Status](https://travis-ci.org/mdaverde/jsonpath.svg?branch=master)](https://travis-ci.org/mdaverde/jsonpath)
 
-Originally intended to be used with `json.Unmarshal`, this is a golang library used to able get and set jsonpaths (even nonexistent paths). 
+Originally intended to be used with `json.Unmarshal`, this is a golang library used to able get and set jsonpaths (even nonexistent paths).
 
 ## Install
 
