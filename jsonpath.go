@@ -18,6 +18,12 @@ func (d DoesNotExist) Error() string {
 var invalidObjError = errors.New("invalid object")
 var pathDelimiter = "."
 
+func SetDelimiter(delimiter string) {
+	if len(delimiter) > 0 {
+		pathDelimiter = delimiter
+	}
+}
+
 func tokenizePath(path string) ([]string, error) {
 	var tokens []string
 	for _, stem := range strings.Split(path, pathDelimiter) {
