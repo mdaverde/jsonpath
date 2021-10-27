@@ -10,6 +10,7 @@ var data = map[string]interface{}{
 	"user": map[string]interface{}{
 		"firstname": "seth",
 		"lastname":  "rogen",
+		"address.local": "my temp address",
 	},
 	"age": 35,
 	"filmography": map[string]interface{}{
@@ -50,6 +51,16 @@ func TestGet(t *testing.T) {
 	if _, ok := err.(DoesNotExist); result != nil || !ok {
 		t.Errorf("does not handle non-existent path correctly")
 	}
+
+	SetDelimiter("|")
+	result, err = Get(data, "user|address.local")
+	if err != nil {
+		t.Errorf("failed to get user|address.local")
+	}
+	if result != "my temp address" {
+		t.Errorf("wrong get value, wanted %v, got %v", "my temp address", result)
+	}
+	SetDelimiter(".")
 }
 
 func TestSet(t *testing.T) {
