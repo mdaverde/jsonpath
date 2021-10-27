@@ -41,7 +41,7 @@ Note: you'll want to pass in a pointer to `data` so that the side effect actuall
 
 ### jsonpath.DoesNotExist error
 
-This is type of error returned with using `jsonpath.Get` on a nonexistent path:
+Returned by  `jsonpath.Get` on a nonexistent path:
 
 ```go
 value, err := Get(data, "where.is.this")
