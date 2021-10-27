@@ -48,7 +48,7 @@ func TestGet(t *testing.T) {
 
 	result, err = Get(data, "this.does.not[0].exist")
 	if _, ok := err.(DoesNotExist); result != nil || !ok {
-		t.Errorf("does not handle non-existant path correctly")
+		t.Errorf("does not handle non-existent path correctly")
 	}
 }
 
@@ -135,7 +135,7 @@ func TestJSON(t *testing.T) {
 		t.Errorf("failed to parse: %v", err)
 	}
 
-	result, err := Get(payload, "tags[2].hello[0]")
+	result, _ := Get(payload, "tags[2].hello[0]")
 	if result != "world" {
 		t.Errorf("got wrong value from path, wanted: %v, got: %v", "world", result)
 	}
@@ -145,7 +145,7 @@ func TestJSON(t *testing.T) {
 		t.Errorf("failed to set: %v", err)
 	}
 
-	result, err = Get(payload, "tags[2].hello[0]")
+	result, _ = Get(payload, "tags[2].hello[0]")
 	if result != "bobby" {
 		t.Errorf("got wrong value after setting, wanted: %v, got: %v", "bobby", result)
 	}
@@ -159,7 +159,7 @@ func TestJSON(t *testing.T) {
 		t.Errorf("failed to set: %v", err)
 	}
 
-	contact, err := Get(&payload, "pet.owner.contact")
+	contact, _ := Get(&payload, "pet.owner.contact")
 	if !reflect.DeepEqual(newContact, contact) {
 		t.Errorf("contact set do not equal, wanted: %v, got %v", newContact, contact)
 	}
@@ -178,7 +178,7 @@ func TestJSON(t *testing.T) {
 		t.Errorf("setting a nonexistant field did not work well, %v", err)
 	}
 
-	b, err := json.Marshal(payload)
+	b, _ := json.Marshal(payload)
 	output := string(b)
 	expected := `{"this":{"is":{"new":[null,null,null,{"hello":"world"}]}}}`
 	if output != expected {
