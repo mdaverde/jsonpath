@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Returned by jsonpath.Get on nonexistent paths
+// DoesNotExist is returned by jsonpath.Get on nonexistent paths
 type DoesNotExist struct{}
 
 func (d DoesNotExist) Error() string {
@@ -94,7 +94,7 @@ func followPtr(data interface{}) interface{} {
 	return rv.Interface()
 }
 
-// Returns the value at the json path or if an error occurred
+// Get returns the value at the json path or if an error occurred
 func Get(data interface{}, path string) (interface{}, error) {
 	var err error
 	tokens, err := tokenizePath(path)
@@ -107,7 +107,7 @@ func Get(data interface{}, path string) (interface{}, error) {
 	return getByTokens(data, tokens)
 }
 
-// Sets value on data at that json path
+// Set value on data at that json path
 func Set(data interface{}, path string, value interface{}) error {
 	tokens, err := tokenizePath(path)
 	if err != nil {
