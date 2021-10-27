@@ -1,9 +1,9 @@
 package jsonpath
 
 import (
-	"testing"
-	"reflect"
 	"encoding/json"
+	"reflect"
+	"testing"
 )
 
 var data = map[string]interface{}{
@@ -47,7 +47,7 @@ func TestGet(t *testing.T) {
 	}
 
 	result, err = Get(data, "this.does.not[0].exist")
-	if _, ok:= err.(DoesNotExist); result != nil || !ok {
+	if _, ok := err.(DoesNotExist); result != nil || !ok {
 		t.Errorf("does not handle non-existant path correctly")
 	}
 }
@@ -75,7 +75,7 @@ func TestSet(t *testing.T) {
 
 	newUser := map[string]interface{}{
 		"firstname": "james",
-		"lastname": "franco",
+		"lastname":  "franco",
 	}
 
 	err = Set(&data, "user", &newUser)

@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-
 type DoesNotExist struct{}
 
 func (d DoesNotExist) Error() string {
@@ -141,7 +140,7 @@ func Set(data interface{}, path string, value interface{}) error {
 				}
 			}
 
-			switch reflect.ValueOf(parent).Kind(){
+			switch reflect.ValueOf(parent).Kind() {
 			case reflect.Map:
 				reflect.ValueOf(parent).SetMapIndex(reflect.ValueOf(token), reflect.ValueOf(child))
 			case reflect.Slice:
@@ -161,7 +160,7 @@ func Set(data interface{}, path string, value interface{}) error {
 
 	switch reflect.ValueOf(child).Kind() {
 	case reflect.Map:
-		reflect.ValueOf(child).SetMapIndex(reflect.ValueOf(last),reflect.ValueOf(value))
+		reflect.ValueOf(child).SetMapIndex(reflect.ValueOf(last), reflect.ValueOf(value))
 		return nil
 	case reflect.Slice:
 		sliceValue := reflect.ValueOf(child)
