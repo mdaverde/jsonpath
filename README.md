@@ -1,4 +1,4 @@
-# jsonpath ![build](https://github.com/mdaverde/jsonpath/actions/workflows/build.yml/badge.svg)
+# jsonpath [![build](https://github.com/mdaverde/jsonpath/actions/workflows/build.yml/badge.svg)](https://github.com/mdaverde/jsonpath/actions)
 
 Originally intended to be used with `json.Unmarshal`, this is a golang library used to able get and set jsonpaths (even nonexistent paths).
 
