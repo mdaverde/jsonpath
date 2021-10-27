@@ -1,4 +1,4 @@
-# jsonpath [![Build Status](https://travis-ci.org/mdaverde/jsonpath.svg?branch=master)](https://travis-ci.org/mdaverde/jsonpath)
+# jsonpath ![build](https://github.com/mdaverde/jsonpath/actions/workflows/build.yml/badge.svg)
 
 Originally intended to be used with `json.Unmarshal`, this is a golang library used to able get and set jsonpaths (even nonexistent paths).
 
@@ -37,7 +37,7 @@ Returns the value at that json path as `interface{}` and if an error occurred
 
 Sets `value` on `data` at that json path
 
-Note: you'll want to pass in a pointer to `data` so that the side effect actually is usable 
+Note: you'll want to pass in a pointer to `data` so that the side effect actually is usable
 
 ### jsonpath.DoesNotExist error
 
