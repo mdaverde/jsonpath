@@ -14,7 +14,7 @@ func (d DoesNotExist) Error() string {
 	return "path not found"
 }
 
-var invalidObjError = errors.New("invalid object")
+var errInvalidObj = errors.New("invalid object")
 var pathDelimiter = "."
 
 func tokenizePath(path string) ([]string, error) {
@@ -38,7 +38,7 @@ func tokenizePath(path string) ([]string, error) {
 
 func getToken(obj interface{}, token string) (interface{}, error) {
 	if reflect.TypeOf(obj) == nil {
-		return nil, invalidObjError
+		return nil, errInvalidObj
 	}
 
 	switch reflect.ValueOf(obj).Kind() {
@@ -123,7 +123,7 @@ func Set(data interface{}, path string, value interface{}) error {
 	for tokenIdx, token := range head {
 		child, err = getToken(parent, token)
 		if err != nil {
-			if _, ok := err.(DoesNotExist); !ok && err != invalidObjError {
+			if _, ok := err.(DoesNotExist); !ok && err != errInvalidObj {
 				return err
 			}
 
