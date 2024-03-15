@@ -37,7 +37,7 @@ func tokenizePath(path string) ([]string, error) {
 	return tokens, nil
 }
 
-func getToken(obj interface{}, token string) (interface{}, error) {
+func getToken(obj any, token string) (any, error) {
 	if reflect.TypeOf(obj) == nil {
 		return nil, errInvalidObj
 	}
@@ -68,7 +68,7 @@ func getToken(obj interface{}, token string) (interface{}, error) {
 	}
 }
 
-func getByTokens(data interface{}, tokens []string) (interface{}, error) {
+func getByTokens(data any, tokens []string) (any, error) {
 	var err error
 
 	child := data
@@ -86,7 +86,7 @@ func getByTokens(data interface{}, tokens []string) (interface{}, error) {
 	return nil, errors.New("could not get value at path")
 }
 
-func followPtr(data interface{}) interface{} {
+func followPtr(data any) any {
 	rv := reflect.ValueOf(data)
 	for rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
@@ -95,7 +95,7 @@ func followPtr(data interface{}) interface{} {
 }
 
 // Get returns the value at the json path or if an error occurred
-func Get(data interface{}, path string) (interface{}, error) {
+func Get(data any, path string) (any, error) {
 	var err error
 	tokens, err := tokenizePath(path)
 	if err != nil {
@@ -108,7 +108,7 @@ func Get(data interface{}, path string) (interface{}, error) {
 }
 
 // Set value on data at that json path
-func Set(data interface{}, path string, value interface{}) error {
+func Set(data any, path string, value any) error {
 	tokens, err := tokenizePath(path)
 	if err != nil {
 		return nil
@@ -130,16 +130,16 @@ func Set(data interface{}, path string, value interface{}) error {
 				return err
 			}
 
-			child = map[string]interface{}{}
+			child = map[string]any{}
 
 			if tokenIdx+1 < len(tokens) {
 				nextToken := tokens[tokenIdx+1]
 				if idx, err := strconv.Atoi(nextToken); err == nil {
-					var childSlice []interface{}
+					var childSlice []any
 					for i := 0; i < idx; i++ {
 						childSlice = append(childSlice, nil)
 					}
-					child = append(childSlice, map[string]interface{}{})
+					child = append(childSlice, map[string]any{})
 				}
 			}
 

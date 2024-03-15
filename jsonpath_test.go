@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-var data = map[string]interface{}{
-	"user": map[string]interface{}{
+var data = map[string]any{
+	"user": map[string]any{
 		"firstname": "seth",
 		"lastname":  "rogen",
 	},
 	"age": 35,
-	"filmography": map[string]interface{}{
+	"filmography": map[string]any{
 		"movies": []string{
 			"This Is The End",
 			"Superbad",
@@ -73,7 +73,7 @@ func TestSet(t *testing.T) {
 		t.Errorf("set filmography.movies[2] to wrong value, wanted: %v, got %v", "The Disaster Artist", secondMovie)
 	}
 
-	newUser := map[string]interface{}{
+	newUser := map[string]any{
 		"firstname": "james",
 		"lastname":  "franco",
 	}
@@ -88,7 +88,7 @@ func TestSet(t *testing.T) {
 		t.Errorf("set user is not equal, wanted: %v, got %v", newUser, user)
 	}
 
-	newData := map[string]interface{}{
+	newData := map[string]any{
 		"hello": 12,
 	}
 
@@ -128,7 +128,7 @@ func TestJSON(t *testing.T) {
 	]
 }
 `
-	var payload interface{}
+	var payload any
 
 	err := json.Unmarshal([]byte(test), &payload)
 	if err != nil {
@@ -171,7 +171,7 @@ func TestJSON(t *testing.T) {
 		t.Errorf("failed to parse: %v", err)
 	}
 
-	err = Set(&payload, "this.is.new[3]", map[string]interface{}{
+	err = Set(&payload, "this.is.new[3]", map[string]any{
 		"hello": "world",
 	})
 	if err != nil {
